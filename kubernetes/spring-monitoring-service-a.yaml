@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: spring-monitoring-a-svc
+  namespace: default
+spec:
+  ports:
+  - name: http
+    port: 8080
+    protocol: TCP
+    targetPort: 8080
+    nodePort: 31080
+  selector:
+    app.kubernetes.io/name: spring-monitoring-a
+  type: NodePort

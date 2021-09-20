@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+
+    <!-- KUBERNETES APPENDER -->
+    <appender name="KUBERNETES" class="ch.qos.logback.core.ConsoleAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <!-- Minimum logging level to be presented in the console logs -->
+            <level>DEBUG</level>
+        </filter>
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+            <providers>
+                <pattern>
+                    <omitEmptyFields>true</omitEmptyFields>
+                    <pattern>
+                        {
+                        "timestamp": "%date{yyyy-MM-dd'T'HH:mm:ss.SSSZZ}",
+                        "thread": "%thread",
+                        "severity": "%level",
+                        "logger": "%logger",
+                        "class": "%class",
+                        "method": "%method",
+                        "line": "%line",
+                        "trace": "%X{traceId}",
+                        "span": "%X{spanId}",
+                        "context": "%X{UserTpmId}",
+                        "message": "%message",
+                        "stacktrace": "%exception"
+                        }
+                    </pattern>
+                </pattern>
+            </providers>
+        </encoder>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="KUBERNETES"/>
+    </root>
+    <logger name="com.inpecotpm.springmonitoring" level="DEBUG" additivity="false">
+        <appender-ref ref="KUBERNETES"/>
+    </logger>
+
+</configuration>

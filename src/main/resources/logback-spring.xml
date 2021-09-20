@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+
+    <springProperty
+            name="APP_NAME"
+            source="spring.application.name"/>
+    <property
+            name="CONSOLE_LOG_PATTERN"
+            value="%clr(%d{yyyy-MM-dd HH:mm:ss.SSS zzz}){faint} %clr(%5p [APP:${APP_NAME}, TID:%X{traceId:-}, SID:%X{spanId:-}, CID:%X{UserTpmId:-}]) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"/>
+
+    <!-- CONSOLE APPENDER -->
+    <appender
+            name="CONSOLE"
+            class="ch.qos.logback.core.ConsoleAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <!-- Minimum logging level to be presented in the console logs-->
+            <level>
+                DEBUG
+            </level>
+        </filter>
+        <encoder>
+            <pattern>
+                ${CONSOLE_LOG_PATTERN}
+            </pattern>
+            <charset>
+                utf8
+            </charset>
+        </encoder>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+    <logger name="com.inpecotpm.springmonitoring" level="DEBUG" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+
+</configuration>

@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: spring-monitoring-a
+  labels:
+    app.kubernetes.io/name: spring-monitoring-a
+
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: spring-monitoring-a
+  template:
+    metadata:
+      namespace: default
+      labels:
+        app.kubernetes.io/name: spring-monitoring-a
+    spec:
+      containers:
+        - name: spring-monitoring-a
+          image: ntuveri/spring-monitoring:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+              name: http
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 100m
+              memory: 200Mi
+            limits:
+              cpu: 200m
+              memory: 400Mi
+      restartPolicy: Always

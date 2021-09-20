@@ -1,0 +1,111 @@
+global:
+  scrape_interval:     15s
+  evaluation_interval: 15s
+
+
+scrape_configs:
+  # metrics for the prometheus server
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # following kubernetes metrics based on https://gist.github.com/sacreman/b61266d2ec52cf3a1af7c278d9d93450
+
+  # metrics for default/kubernetes api's from the kubernetes master
+  - job_name: 'kubernetes-api-servers'
+    kubernetes_sd_configs:
+      - role: endpoints
+        api_server: https://nicola-ubuntu:16443/
+        tls_config:
+          insecure_skip_verify: true
+        bearer_token: eyJhbGciOiJSUzI1NiIsImtpZCI6IktYRUFDTHNoMTROX1RpS0hzc0JtTVlWNER0TXhweWZ3LVRuOXNSS2s1UEUifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJrdWJlLXN5c3RlbSIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VjcmV0Lm5hbWUiOiJkZWZhdWx0LXRva2VuLXhucmJoIiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQubmFtZSI6ImRlZmF1bHQiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC51aWQiOiI1MGQwZGM0NS1lOTJhLTRmMzMtOTdhMC1mNWNmZGU4N2JkMzAiLCJzdWIiOiJzeXN0ZW06c2VydmljZWFjY291bnQ6a3ViZS1zeXN0ZW06ZGVmYXVsdCJ9.TunQ9OSpyRYb9r4kwIXAeisJj0mvQ8jxHx2jOTAFGLBQ2ljvwA66B_rJEJ8pQMRoMwqeTZG9E6MzXFZpdJY_hCuoCYhQMc9UohI5yQ8_-Iqv3NAJxgaY5BT2IcXStlzTBYvMC_y1cpeKczvga26LjiuWqMMtbh0TlLTql-uUFza2r_DP9N4iUz0VM2wgnuPfaVgLgJOQHXbFs0ksgaIfx4dYoAVL6qRQtFYaNGZlcQ_qe7I4NvBcS_FFrCnPy3D1vlCNgMbFmnUlFhta4GWyVKH9kJfX7aW4FkalPh8iwbEgufuO2j5Qo7xVmQYn6JpnqGxSssRghFFPDr3PYkPdtA
+    scheme: https
+    tls_config:
+      insecure_skip_verify: true
+    bearer_token: eyJhbGciOiJSUzI1NiIsImtpZCI6IktYRUFDTHNoMTROX1RpS0hzc0JtTVlWNER0TXhweWZ3LVRuOXNSS2s1UEUifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJrdWJlLXN5c3RlbSIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VjcmV0Lm5hbWUiOiJkZWZhdWx0LXRva2VuLXhucmJoIiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQubmFtZSI6ImRlZmF1bHQiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC51aWQiOiI1MGQwZGM0NS1lOTJhLTRmMzMtOTdhMC1mNWNmZGU4N2JkMzAiLCJzdWIiOiJzeXN0ZW06c2VydmljZWFjY291bnQ6a3ViZS1zeXN0ZW06ZGVmYXVsdCJ9.TunQ9OSpyRYb9r4kwIXAeisJj0mvQ8jxHx2jOTAFGLBQ2ljvwA66B_rJEJ8pQMRoMwqeTZG9E6MzXFZpdJY_hCuoCYhQMc9UohI5yQ8_-Iqv3NAJxgaY5BT2IcXStlzTBYvMC_y1cpeKczvga26LjiuWqMMtbh0TlLTql-uUFza2r_DP9N4iUz0VM2wgnuPfaVgLgJOQHXbFs0ksgaIfx4dYoAVL6qRQtFYaNGZlcQ_qe7I4NvBcS_FFrCnPy3D1vlCNgMbFmnUlFhta4GWyVKH9kJfX7aW4FkalPh8iwbEgufuO2j5Qo7xVmQYn6JpnqGxSssRghFFPDr3PYkPdtA
+    relabel_configs:
+      - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
+        action: keep
+        regex: default;kubernetes;https
+      - target_label: __address__
+        replacement: nicola-ubuntu:16443
+
+  # metrics for the kubernetes node kubelet service (collection proxied through master)
+  - job_name: 'kubernetes-nodes'
+    kubernetes_sd_configs:
+      - role: node
+        api_server: https://nicola-ubuntu:16443
+        tls_config:
+          insecure_skip_verify: true
+        bearer_token: eyJhbGciOiJSUzI1NiIsImtpZCI6IktYRUFDTHNoMTROX1RpS0hzc0JtTVlWNER0TXhweWZ3LVRuOXNSS2s1UEUifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJrdWJlLXN5c3RlbSIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VjcmV0Lm5hbWUiOiJkZWZhdWx0LXRva2VuLXhucmJoIiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQubmFtZSI6ImRlZmF1bHQiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC51aWQiOiI1MGQwZGM0NS1lOTJhLTRmMzMtOTdhMC1mNWNmZGU4N2JkMzAiLCJzdWIiOiJzeXN0ZW06c2VydmljZWFjY291bnQ6a3ViZS1zeXN0ZW06ZGVmYXVsdCJ9.TunQ9OSpyRYb9r4kwIXAeisJj0mvQ8jxHx2jOTAFGLBQ2ljvwA66B_rJEJ8pQMRoMwqeTZG9E6MzXFZpdJY_hCuoCYhQMc9UohI5yQ8_-Iqv3NAJxgaY5BT2IcXStlzTBYvMC_y1cpeKczvga26LjiuWqMMtbh0TlLTql-uUFza2r_DP9N4iUz0VM2wgnuPfaVgLgJOQHXbFs0ksgaIfx4dYoAVL6qRQtFYaNGZlcQ_qe7I4NvBcS_FFrCnPy3D1vlCNgMbFmnUlFhta4GWyVKH9kJfX7aW4FkalPh8iwbEgufuO2j5Qo7xVmQYn6JpnqGxSssRghFFPDr3PYkPdtA
+    scheme: https
+    tls_config:
+      insecure_skip_verify: true
+    bearer_token: eyJhbGciOiJSUzI1NiIsImtpZCI6IktYRUFDTHNoMTROX1RpS0hzc0JtTVlWNER0TXhweWZ3LVRuOXNSS2s1UEUifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJrdWJlLXN5c3RlbSIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VjcmV0Lm5hbWUiOiJkZWZhdWx0LXRva2VuLXhucmJoIiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQubmFtZSI6ImRlZmF1bHQiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC51aWQiOiI1MGQwZGM0NS1lOTJhLTRmMzMtOTdhMC1mNWNmZGU4N2JkMzAiLCJzdWIiOiJzeXN0ZW06c2VydmljZWFjY291bnQ6a3ViZS1zeXN0ZW06ZGVmYXVsdCJ9.TunQ9OSpyRYb9r4kwIXAeisJj0mvQ8jxHx2jOTAFGLBQ2ljvwA66B_rJEJ8pQMRoMwqeTZG9E6MzXFZpdJY_hCuoCYhQMc9UohI5yQ8_-Iqv3NAJxgaY5BT2IcXStlzTBYvMC_y1cpeKczvga26LjiuWqMMtbh0TlLTql-uUFza2r_DP9N4iUz0VM2wgnuPfaVgLgJOQHXbFs0ksgaIfx4dYoAVL6qRQtFYaNGZlcQ_qe7I4NvBcS_FFrCnPy3D1vlCNgMbFmnUlFhta4GWyVKH9kJfX7aW4FkalPh8iwbEgufuO2j5Qo7xVmQYn6JpnqGxSssRghFFPDr3PYkPdtA
+    relabel_configs:
+      - action: labelmap
+        regex: __meta_kubernetes_node_label_(.+)
+      - target_label: __address__
+        replacement: nicola-ubuntu:16443
+      - source_labels: [__meta_kubernetes_node_name]
+        regex: (.+)
+        target_label: __metrics_path__
+        replacement: /api/v1/nodes/${1}/proxy/metrics
+
+  # metrics from pod endpoints on /metrics over https via the master proxy
+  - job_name: 'kubernetes-pods'
+    kubernetes_sd_configs:
+      - role: pod
+        api_server: https://nicola-ubuntu:16443
+        tls_config:
+          insecure_skip_verify: true
+        bearer_token: eyJhbGciOiJSUzI1NiIsImtpZCI6IktYRUFDTHNoMTROX1RpS0hzc0JtTVlWNER0TXhweWZ3LVRuOXNSS2s1UEUifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJrdWJlLXN5c3RlbSIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VjcmV0Lm5hbWUiOiJkZWZhdWx0LXRva2VuLXhucmJoIiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQubmFtZSI6ImRlZmF1bHQiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC51aWQiOiI1MGQwZGM0NS1lOTJhLTRmMzMtOTdhMC1mNWNmZGU4N2JkMzAiLCJzdWIiOiJzeXN0ZW06c2VydmljZWFjY291bnQ6a3ViZS1zeXN0ZW06ZGVmYXVsdCJ9.TunQ9OSpyRYb9r4kwIXAeisJj0mvQ8jxHx2jOTAFGLBQ2ljvwA66B_rJEJ8pQMRoMwqeTZG9E6MzXFZpdJY_hCuoCYhQMc9UohI5yQ8_-Iqv3NAJxgaY5BT2IcXStlzTBYvMC_y1cpeKczvga26LjiuWqMMtbh0TlLTql-uUFza2r_DP9N4iUz0VM2wgnuPfaVgLgJOQHXbFs0ksgaIfx4dYoAVL6qRQtFYaNGZlcQ_qe7I4NvBcS_FFrCnPy3D1vlCNgMbFmnUlFhta4GWyVKH9kJfX7aW4FkalPh8iwbEgufuO2j5Qo7xVmQYn6JpnqGxSssRghFFPDr3PYkPdtA
+        # filter target pods by namespace
+        namespaces:
+          names:
+            - default
+    scheme: https
+    tls_config:
+      insecure_skip_verify: true
+    bearer_token: eyJhbGciOiJSUzI1NiIsImtpZCI6IktYRUFDTHNoMTROX1RpS0hzc0JtTVlWNER0TXhweWZ3LVRuOXNSS2s1UEUifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJrdWJlLXN5c3RlbSIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VjcmV0Lm5hbWUiOiJkZWZhdWx0LXRva2VuLXhucmJoIiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQubmFtZSI6ImRlZmF1bHQiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC51aWQiOiI1MGQwZGM0NS1lOTJhLTRmMzMtOTdhMC1mNWNmZGU4N2JkMzAiLCJzdWIiOiJzeXN0ZW06c2VydmljZWFjY291bnQ6a3ViZS1zeXN0ZW06ZGVmYXVsdCJ9.TunQ9OSpyRYb9r4kwIXAeisJj0mvQ8jxHx2jOTAFGLBQ2ljvwA66B_rJEJ8pQMRoMwqeTZG9E6MzXFZpdJY_hCuoCYhQMc9UohI5yQ8_-Iqv3NAJxgaY5BT2IcXStlzTBYvMC_y1cpeKczvga26LjiuWqMMtbh0TlLTql-uUFza2r_DP9N4iUz0VM2wgnuPfaVgLgJOQHXbFs0ksgaIfx4dYoAVL6qRQtFYaNGZlcQ_qe7I4NvBcS_FFrCnPy3D1vlCNgMbFmnUlFhta4GWyVKH9kJfX7aW4FkalPh8iwbEgufuO2j5Qo7xVmQYn6JpnqGxSssRghFFPDr3PYkPdtA
+    relabel_configs:
+#      - source_labels: [__meta_kubernetes_namespace]
+#        action: keep
+#        regex: default
+      - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_pod_name, __meta_kubernetes_pod_container_port_number]
+        target_label: __metrics_path__
+        regex: (.+);(.+);(.+)
+        replacement: /api/v1/namespaces/$1/pods/$2:$3/proxy/actuator/prometheus
+      - source_labels: [ __meta_kubernetes_pod_name]
+        action: replace
+        target_label: application
+      - target_label: __address__
+        replacement: nicola-ubuntu:16443
+      - action: labelmap
+        regex: __meta_kubernetes_pod_label_(.+)
+      - source_labels: [__meta_kubernetes_namespace]
+        action: replace
+        target_label: kubernetes_namespace
+      - source_labels: [__meta_kubernetes_pod_name]
+        action: replace
+        target_label: kubernetes_pod_name
+      - source_labels: [__meta_kubernetes_pod_node_name]
+        action: replace
+        target_label: instance
+
+  # added job for newer k8s clusters (cadvisor metrics)
+  - job_name: 'kubernetes-cadvisor'
+    kubernetes_sd_configs:
+      - role: node
+        api_server: https://nicola-ubuntu:16443
+        tls_config:
+          insecure_skip_verify: true
+        bearer_token: eyJhbGciOiJSUzI1NiIsImtpZCI6IktYRUFDTHNoMTROX1RpS0hzc0JtTVlWNER0TXhweWZ3LVRuOXNSS2s1UEUifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJrdWJlLXN5c3RlbSIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VjcmV0Lm5hbWUiOiJkZWZhdWx0LXRva2VuLXhucmJoIiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQubmFtZSI6ImRlZmF1bHQiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC51aWQiOiI1MGQwZGM0NS1lOTJhLTRmMzMtOTdhMC1mNWNmZGU4N2JkMzAiLCJzdWIiOiJzeXN0ZW06c2VydmljZWFjY291bnQ6a3ViZS1zeXN0ZW06ZGVmYXVsdCJ9.TunQ9OSpyRYb9r4kwIXAeisJj0mvQ8jxHx2jOTAFGLBQ2ljvwA66B_rJEJ8pQMRoMwqeTZG9E6MzXFZpdJY_hCuoCYhQMc9UohI5yQ8_-Iqv3NAJxgaY5BT2IcXStlzTBYvMC_y1cpeKczvga26LjiuWqMMtbh0TlLTql-uUFza2r_DP9N4iUz0VM2wgnuPfaVgLgJOQHXbFs0ksgaIfx4dYoAVL6qRQtFYaNGZlcQ_qe7I4NvBcS_FFrCnPy3D1vlCNgMbFmnUlFhta4GWyVKH9kJfX7aW4FkalPh8iwbEgufuO2j5Qo7xVmQYn6JpnqGxSssRghFFPDr3PYkPdtA
+    scheme: https
+    metrics_path: /metrics/cadvisor
+    tls_config:
+      insecure_skip_verify: true
+    bearer_token: eyJhbGciOiJSUzI1NiIsImtpZCI6IktYRUFDTHNoMTROX1RpS0hzc0JtTVlWNER0TXhweWZ3LVRuOXNSS2s1UEUifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJrdWJlLXN5c3RlbSIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VjcmV0Lm5hbWUiOiJkZWZhdWx0LXRva2VuLXhucmJoIiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQubmFtZSI6ImRlZmF1bHQiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC51aWQiOiI1MGQwZGM0NS1lOTJhLTRmMzMtOTdhMC1mNWNmZGU4N2JkMzAiLCJzdWIiOiJzeXN0ZW06c2VydmljZWFjY291bnQ6a3ViZS1zeXN0ZW06ZGVmYXVsdCJ9.TunQ9OSpyRYb9r4kwIXAeisJj0mvQ8jxHx2jOTAFGLBQ2ljvwA66B_rJEJ8pQMRoMwqeTZG9E6MzXFZpdJY_hCuoCYhQMc9UohI5yQ8_-Iqv3NAJxgaY5BT2IcXStlzTBYvMC_y1cpeKczvga26LjiuWqMMtbh0TlLTql-uUFza2r_DP9N4iUz0VM2wgnuPfaVgLgJOQHXbFs0ksgaIfx4dYoAVL6qRQtFYaNGZlcQ_qe7I4NvBcS_FFrCnPy3D1vlCNgMbFmnUlFhta4GWyVKH9kJfX7aW4FkalPh8iwbEgufuO2j5Qo7xVmQYn6JpnqGxSssRghFFPDr3PYkPdtA
+    relabel_configs:
+      - action: labelmap
+        regex: __meta_kubernetes_node_label_(.+)
