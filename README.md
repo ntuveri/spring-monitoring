@@ -36,6 +36,29 @@ Set up the Prometheus data source and install the following dashboards:
 - add the Prometheus datasource (can be accessed trough host network with http://host.docker.internal:9090)
 - add the JVM micrometer dashboard at https://grafana.com/grafana/dashboards/4701
 
+Sample queries for Loki data source
+`{severity="ERROR"} | json | message_severity="ERROR" | line_format "{{.message_message}}" |~ "RuntimeException"`
+`{severity="DEBUG"} | json pod_hash="kubernetes.labels[\"pod-template-hash\"]" | pod_hash="754b4596d8"`
+
+Sample query for alert based on Prometheus data source
+`sum by (app_kubernetes_io_name, instance) (rate({level="error"}[1h]))`
+
+# Run Jaeger with Docker
+Jaeger Ports / protocols (see https://www.jaegertracing.io/docs/1.26/getting-started/#all-in-one) 
+
+|Port	|Protocol	    |Component	|Function                                                                                   |
+|-------|---------------|-----------|-------------------------------------------------------------------------------------------|
+|5775	|UDP	        |agent	    |accept zipkin.thrift over compact thrift protocol (deprecated, used by legacy clients only)|
+|6831	|UDP	        |agent	    |accept jaeger.thrift over compact thrift protocol                                          |
+|6832	|UDP	        |agent	    |accept jaeger.thrift over binary thrift protocol                                           |
+|5778	|HTTP	        |agent	    |serve configs                                                                              |
+|16686	|HTTP	        |query	    |serve frontend                                                                             |
+|14268	|HTTP	        |collector	|accept jaeger.thrift directly from clients                                                 |
+|14250	|HTTP	        |collector	|accept model.proto                                                                         |
+|9411	|HTTP	        |collector	|Zipkin compatible endpoint (optional)                                                      |
+
+`docker run -d --name jaeger -e COLLECTOR_ZIPKIN_HOST_PORT=:9411 -p 5778:5778 -p 16686:16686 -p 9411:9411 jaegertracing/all-in-one`
+
 # Sample Urls
 Url for scraping metrics of a pod exposed with a service through the Kubernetes API proxy   
 https://<Kubernetes-Node>:16443/api/v1/namespaces/default/services/spring-prometheus-svc:8080/proxy/actuator

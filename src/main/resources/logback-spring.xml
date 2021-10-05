@@ -32,7 +32,8 @@
     <root level="INFO">
         <appender-ref ref="CONSOLE"/>
     </root>
-    <logger name="com.inpecotpm.springmonitoring" level="DEBUG" additivity="false">
+    <logger name="com.inpecotpm.springmonitoring" additivity="false">
+        <level>DEBUG</level>
         <appender-ref ref="CONSOLE"/>
     </logger>
 

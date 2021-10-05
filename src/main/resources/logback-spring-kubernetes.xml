@@ -36,7 +36,8 @@
     <root level="INFO">
         <appender-ref ref="KUBERNETES"/>
     </root>
-    <logger name="com.inpecotpm.springmonitoring" level="DEBUG" additivity="false">
+    <logger name="com.inpecotpm.springmonitoring" additivity="false">
+        <level>DEBUG</level>
         <appender-ref ref="KUBERNETES"/>
     </logger>
 
