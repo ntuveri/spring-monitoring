@@ -10,8 +10,8 @@ data:
   # ======================================================
   fluent-bit.conf: |
     [SERVICE]
-        Flush         1
-        Log_Level     debug
+        Flush         10
+        Log_Level     info
         Daemon        off
         Parsers_File  parsers.conf
         HTTP_Server   On
@@ -34,7 +34,7 @@ data:
         Parser            cri
         DB                /var/log/flb_kube.db
         Skip_Long_Lines   On
-        Refresh_Interval  10
+        Refresh_Interval  30
 
     [INPUT]
         Name              tail
@@ -44,7 +44,7 @@ data:
         Parser            cri
         DB                /var/log/flb_kube.db
         Skip_Long_Lines   On
-        Refresh_Interval  10
+        Refresh_Interval  30
 
 
   filter-kubernetes.conf: |
